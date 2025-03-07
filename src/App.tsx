@@ -17,7 +17,6 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/paciente" element={<PatientView />} />
-          {/* <Route path="*" element={<NotFound />} /> */}
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
