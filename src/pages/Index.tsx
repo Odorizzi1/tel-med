@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 
 const Index = () => {
   const [loading, setLoading] = useState(true);
-  const [callDuration, setCallDuration] = useState(0);
+//   const [callDuration, setCallDuration] = useState(0);
 
   useEffect(() => {
     // Simulate loading state
@@ -52,7 +52,7 @@ const Index = () => {
                   <VideoCall 
                     doctorName="Dra. Melissa Santos" 
                     doctorSpecialty="Clínica Geral"
-                    duration={callDuration}
+                    duration={0}
                   />
                 )}
               </CardContent>
