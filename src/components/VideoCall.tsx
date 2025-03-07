@@ -19,6 +19,7 @@ interface VideoCallProps {
   doctorSpecialty?: string;
   duration?: number;
   isConnected?: boolean;
+  isPatientView?: boolean;
 }
 
 const VideoCall = ({
@@ -26,6 +27,7 @@ const VideoCall = ({
   doctorSpecialty = "Clínica Geral",
   duration = 0,
   isConnected = true,
+  isPatientView = false,
 }: VideoCallProps) => {
   const [micEnabled, setMicEnabled] = useState(true);
   const [videoEnabled, setVideoEnabled] = useState(true);
@@ -51,14 +53,16 @@ const VideoCall = ({
       const timer = setTimeout(() => {
         setConnectionStatus("connected");
         toast({
-          title: "Conexão estabelecida",
-          description: "Você está conectado com " + doctorName,
+          title: isPatientView ? "Conexão estabelecida com o médico" : "Conexão estabelecida",
+          description: isPatientView 
+            ? `Você está conectado com ${doctorName}`
+            : `Você está conectado com o paciente`,
         });
       }, 2000);
       
       return () => clearTimeout(timer);
     }
-  }, [connectionStatus, doctorName, toast]);
+  }, [connectionStatus, doctorName, toast, isPatientView]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -182,11 +186,11 @@ const VideoCall = ({
       
       {/* Main call area */}
       <div className="relative flex-1 bg-gradient-to-b from-medical-light/30 to-background overflow-hidden">
-        {/* Doctor video - main video */}
+        {/* Doctor/Patient video - main video */}
         <div className="absolute inset-0 flex items-center justify-center animate-blur-in">
           {videoEnabled ? (
             <div className="w-full h-full max-w-4xl aspect-video relative mx-auto mt-4 rounded-2xl overflow-hidden shadow-xl">
-              {/* Simulated doctor video with a gradient background */}
+              {/* Simulated video with a gradient background */}
               <div className="absolute inset-0 bg-gradient-to-tr from-medical-dark/5 to-medical-light/20 animate-pulse-subtle"></div>
               
               <div className="absolute top-4 left-4 glass-effect px-3 py-1.5 rounded-lg flex items-center gap-2 animate-fade-in">
@@ -194,8 +198,17 @@ const VideoCall = ({
                   <User className="h-4 w-4" />
                 </Avatar>
                 <div className="flex flex-col">
-                  <span className="text-sm font-medium">{doctorName}</span>
-                  <span className="text-xs text-muted-foreground">{doctorSpecialty}</span>
+                  {isPatientView ? (
+                    <>
+                      <span className="text-sm font-medium">{doctorName}</span>
+                      <span className="text-xs text-muted-foreground">{doctorSpecialty}</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-sm font-medium">Paciente</span>
+                      <span className="text-xs text-muted-foreground">Em consulta</span>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -205,15 +218,24 @@ const VideoCall = ({
                 <Avatar className="h-20 w-20 mx-auto mb-4 bg-medical-light border-4 border-white">
                   <User className="h-10 w-10 text-medical" />
                 </Avatar>
-                <h3 className="text-xl font-medium">{doctorName}</h3>
-                <p className="text-sm text-muted-foreground">{doctorSpecialty}</p>
+                {isPatientView ? (
+                  <>
+                    <h3 className="text-xl font-medium">{doctorName}</h3>
+                    <p className="text-sm text-muted-foreground">{doctorSpecialty}</p>
+                  </>
+                ) : (
+                  <>
+                    <h3 className="text-xl font-medium">Paciente</h3>
+                    <p className="text-sm text-muted-foreground">Em consulta</p>
+                  </>
+                )}
                 <Badge className="mt-2 bg-medical-light/50 text-medical border-none">Câmera desativada</Badge>
               </div>
             </Card>
           )}
         </div>
         
-        {/* Patient video - picture in picture */}
+        {/* Self video - picture in picture */}
         <div className="absolute bottom-28 md:bottom-24 right-4 md:right-8 w-32 md:w-48 aspect-video rounded-lg overflow-hidden shadow-lg border-2 border-white z-10 animate-scale-in">
           <div className={cn(
             "w-full h-full",

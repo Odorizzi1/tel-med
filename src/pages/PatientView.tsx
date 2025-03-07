@@ -1,24 +1,37 @@
+
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import VideoCall from "@/components/VideoCall";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { ShieldCheck, Clock, CalendarClock, FileText, Pill, UserRound } from "lucide-react";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+import { ShieldCheck, Clock, FileText, MessageSquare, Pill, ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 
-const Index = () => {
+const PatientView = () => {
   const [loading, setLoading] = useState(true);
-  // const [callDuration, setCallDuration] = useState(0);
+//   const [callDuration, setCallDuration] = useState(0);
+  const [waitingForDoctor, setWaitingForDoctor] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
     // Simulate loading state
     const timer = setTimeout(() => {
       setLoading(false);
+      
+      // Simulate waiting for doctor
+      setTimeout(() => {
+        setWaitingForDoctor(false);
+        toast({
+          title: "Médico entrou na sala",
+          description: "Dra. Melissa Santos se juntou à consulta",
+        });
+      }, 3000);
     }, 1500);
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [toast]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-medical-muted">
@@ -30,9 +43,14 @@ const Index = () => {
             </div>
             <h1 className="text-xl font-semibold tracking-tight">TeleMed</h1>
           </div>
-          <Badge variant="outline" className="bg-medical-light/40 text-medical border-medical/20">
+          <Badge variant="outline" className={cn(
+            "transition-colors duration-300",
+            waitingForDoctor
+              ? "bg-amber-100/40 text-amber-600 border-amber-200/40"
+              : "bg-medical-light/40 text-medical border-medical/20"
+          )}>
             <Clock className="h-3 w-3 mr-1" />
-            Consulta em andamento
+            {waitingForDoctor ? "Aguardando médico" : "Consulta em andamento"}
           </Badge>
         </div>
       </header>
@@ -47,13 +65,26 @@ const Index = () => {
               <CardContent className="p-0">
                 {loading ? (
                   <div className="aspect-video bg-medical-light/20 flex items-center justify-center">
-                    <span className="text-medical">Carregando consulta...</span>
+                    <span className="text-medical">Preparando consulta...</span>
+                  </div>
+                ) : waitingForDoctor ? (
+                  <div className="aspect-video bg-medical-light/10 flex flex-col items-center justify-center">
+                    <div className="w-16 h-16 rounded-full bg-medical-light/20 flex items-center justify-center mb-4 animate-pulse">
+                      <ShieldCheck className="h-8 w-8 text-medical" />
+                    </div>
+                    <h3 className="text-xl font-semibold mb-2">Sala de espera virtual</h3>
+                    <p className="text-muted-foreground mb-4">O médico entrará na sala em breve</p>
+                    <Badge className="animate-pulse bg-amber-100/40 text-amber-600 border-amber-200/40">
+                      <Clock className="h-3 w-3 mr-1" />
+                      Preparando conexão...
+                    </Badge>
                   </div>
                 ) : (
                   <VideoCall 
                     doctorName="Dra. Melissa Santos" 
                     doctorSpecialty="Clínica Geral"
                     duration={0}
+                    isPatientView={true}
                   />
                 )}
               </CardContent>
@@ -63,10 +94,10 @@ const Index = () => {
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
                   <FileText className="h-5 w-5 text-medical" />
-                  Resumo da Consulta
+                  Minha Consulta
                 </CardTitle>
                 <CardDescription>
-                  Informações sobre a consulta atual
+                  Detalhes da sua consulta atual
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -93,7 +124,7 @@ const Index = () => {
                 <div className="pt-4">
                   <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
                     <Pill className="h-4 w-4 text-medical" />
-                    Sintomas Relatados
+                    Seus Sintomas Informados
                   </h4>
                   <div className="flex flex-wrap gap-2">
                     <Badge variant="outline" className="bg-background">Dor de cabeça</Badge>
@@ -101,14 +132,15 @@ const Index = () => {
                     <Badge variant="outline" className="bg-background">Fadiga</Badge>
                   </div>
                 </div>
-
-                <Button variant="outline" className="w-full mt-2" asChild>
-                  <Link to="/paciente" className="flex items-center gap-2">
-                    <UserRound className="h-4 w-4" />
-                    Ver Visualização do Paciente
+              </CardContent>
+              <CardFooter>
+                <Button variant="outline" size="sm" asChild className="w-full gap-2">
+                  <Link to="/">
+                    <ArrowLeft className="h-4 w-4" />
+                    Voltar para Painel Principal
                   </Link>
                 </Button>
-              </CardContent>
+              </CardFooter>
             </Card>
           </div>
 
@@ -116,39 +148,47 @@ const Index = () => {
             <Card className="shadow-md border-transparent animate-slide-in">
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
-                  <CalendarClock className="h-5 w-5 text-medical" />
-                  Próximas Consultas
+                  <MessageSquare className="h-5 w-5 text-medical" />
+                  Chat da Consulta
                 </CardTitle>
                 <CardDescription>
-                  Seu calendário médico
+                  Envie mensagens ao médico
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="p-3 rounded-lg border border-medical-light transition-all hover:bg-medical-light/10">
-                  <div className="flex justify-between mb-1">
-                    <span className="font-medium">Dr. Ricardo Alves</span>
-                    <Badge variant="outline" className="h-5 text-[10px]">Cardiologia</Badge>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">22/06/2023</span>
-                    <span className="text-medical">10:00</span>
+              <CardContent className="h-60 flex flex-col">
+                <div className="flex-1 bg-medical-light/10 rounded-lg p-4 mb-4 overflow-y-auto">
+                  <div className="space-y-3">
+                    <div className="flex gap-2">
+                      <div className="h-8 w-8 rounded-full bg-medical-light flex items-center justify-center flex-shrink-0">
+                        <ShieldCheck className="h-4 w-4 text-medical" />
+                      </div>
+                      <div className="bg-medical-light/40 text-medical-dark p-2 rounded-lg rounded-tl-none max-w-[80%]">
+                        <p className="text-sm">Olá! Seja bem-vindo à sua teleconsulta. A Dra. Melissa irá atendê-lo em breve.</p>
+                      </div>
+                    </div>
+                    
+                    {!waitingForDoctor && (
+                      <div className="flex gap-2">
+                        <div className="h-8 w-8 rounded-full bg-medical flex items-center justify-center flex-shrink-0">
+                          <ShieldCheck className="h-4 w-4 text-white" />
+                        </div>
+                        <div className="bg-medical text-white p-2 rounded-lg rounded-tl-none max-w-[80%]">
+                          <p className="text-sm">Olá! Sou a Dra. Melissa Santos. Em que posso ajudá-lo hoje?</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
-                
-                <div className="p-3 rounded-lg border border-medical-light transition-all hover:bg-medical-light/10">
-                  <div className="flex justify-between mb-1">
-                    <span className="font-medium">Dra. Laura Costa</span>
-                    <Badge variant="outline" className="h-5 text-[10px]">Dermatologia</Badge>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">30/06/2023</span>
-                    <span className="text-medical">15:30</span>
-                  </div>
+                <div className="relative">
+                  <input 
+                    type="text" 
+                    className="w-full p-3 pr-12 border rounded-lg focus:outline-none focus:ring-2 focus:ring-medical" 
+                    placeholder="Digite sua mensagem..." 
+                  />
+                  <Button className="absolute right-1 top-1 h-8 w-8 p-0" size="icon">
+                    <MessageSquare className="h-4 w-4" />
+                  </Button>
                 </div>
-                
-                <Button variant="outline" className="w-full mt-2">
-                  Ver todas as consultas
-                </Button>
               </CardContent>
             </Card>
             
@@ -175,4 +215,4 @@ const Index = () => {
   );
 };
 
-export default Index;
+export default PatientView;
